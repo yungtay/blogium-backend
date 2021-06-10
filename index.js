@@ -12,10 +12,31 @@ app.use(express.json());
 app.use(cors());
 
 app.post("/posts", (req, res) => {
-    posts.push({id: posts.length + 1, comments:[] , commentCount: 0,  ...req.body, contentPreview: "Hardcoded porque não tem opção no front"})
-    fs.writeFileSync("./posts.txt", JSON.stringify(posts));
-    res.send("Ok")
-})
+  if (!req.body.title) {
+    return res
+      .status(400)
+      .send(`O campo title não está preenchido corretamente`);
+  }
+  if (!req.body.content) {
+    return res
+      .status(400)
+      .send(`O campo content não está preenchido corretamente`);
+  }
+  if (!req.body.coverUrl) {
+    return res
+      .status(400)
+      .send(`O campo coverUrl não está preenchido corretamente`);
+  }
+  posts.push({
+    id: posts.length + 1,
+    comments: [],
+    commentCount: 0,
+    ...req.body,
+    contentPreview: "Hardcoded porque não tem opção no front",
+  });
+  fs.writeFileSync("./posts.txt", JSON.stringify(posts));
+  res.send("Ok");
+});
 
 app.get("/posts", (req, res) => {
     res.send(posts)
@@ -40,6 +61,21 @@ app.post("/posts/:id/comments", (req, res) => {
 })
 
 app.put("/posts/:id",  (req, res) => {
+    if (!req.body.title) {
+        return res
+          .status(400)
+          .send(`O campo title não está preenchido corretamente`);
+      }
+      if (!req.body.content && req.body.content == "<p><br></p>") {
+        return res
+          .status(400)
+          .send(`O campo content não está preenchido corretamente`);
+      }
+      if (!req.body.coverUrl) {
+        return res
+          .status(400)
+          .send(`O campo coverUrl não está preenchido corretamente`);
+      }
     const objIndex = posts.findIndex((obj => parseInt(req.params.id)));
     posts[objIndex].title = req.body.title
     posts[objIndex].content = req.body.content
